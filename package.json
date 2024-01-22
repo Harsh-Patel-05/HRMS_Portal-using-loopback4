@@ -57,13 +57,16 @@
     "@loopback/rest": "^13.1.5",
     "@loopback/rest-explorer": "^6.1.5",
     "@loopback/service-proxy": "^6.1.5",
+    "dotenv": "^16.3.2",
     "loopback-connector-mongodb": "^5.6.0",
+    "luxon": "^3.4.4",
     "tslib": "^2.0.0"
   },
   "devDependencies": {
     "@loopback/build": "^10.1.5",
     "@loopback/eslint-config": "^14.0.5",
     "@loopback/testlab": "^6.1.5",
+    "@types/luxon": "^3.4.2",
     "@types/node": "^16.18.70",
     "eslint": "^8.51.0",
     "source-map-support": "^0.5.21",
