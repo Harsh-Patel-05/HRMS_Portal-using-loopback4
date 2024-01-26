@@ -18,14 +18,14 @@ export namespace TokenServiceBindings {
   );
 }
 
-// export namespace Loopback4BoilerplatePublicConstants {
-//   export enum UserStatus {
-//     ACTIVE = 'active',
-//     INACTIVE = 'inactive',
-//   }
+export namespace Loopback4BoilerplatePublicConstants {
+  export enum UserStatus {
+    ACTIVE = 'active',
+    INACTIVE = 'inactive',
+  }
 
-//   export enum SessionStatus {
-//     CURRENT = 'current',
-//     EXPIRED = 'expired',
-//   }
-// }
+  export enum SessionStatus {
+    CURRENT = 'current',
+    EXPIRED = 'expired',
+  }
+}

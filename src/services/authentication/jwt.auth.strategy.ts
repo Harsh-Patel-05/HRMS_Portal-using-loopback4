@@ -4,13 +4,13 @@ import {repository} from '@loopback/repository';
 import {HttpErrors, Request, RestBindings} from '@loopback/rest';
 import {UserProfile, securityId} from '@loopback/security';
 import {TokenServiceBindings} from '../../keys';
-// import {Session} from '../../models';
+import {Session} from '../../models';
 import {User} from '../../models/user.model';
-import {UserRepository} from '../../repositories';
+import {SessionRepository, UserRepository} from '../../repositories';
 
 export type AuthCredentials = {
   user?: User;
-  // session?: Session;
+  session?: Session;
 };
 export class JWTAuthenticationStrategy implements AuthenticationStrategy {
   name = 'jwt';
@@ -19,8 +19,8 @@ export class JWTAuthenticationStrategy implements AuthenticationStrategy {
     @inject(RestBindings.Http.REQUEST) private req: Request,
     @inject(TokenServiceBindings.TOKEN_SERVICE)
     public tokenService: TokenService,
-    // @repository(SessionRepository)
-    // public sessionRepository: SessionRepository,
+    @repository(SessionRepository)
+    public sessionRepository: SessionRepository,
     @repository(UserRepository)
     public userRepository: UserRepository,
   ) {}
@@ -62,22 +62,22 @@ export class JWTAuthenticationStrategy implements AuthenticationStrategy {
       );
 
       let user;
-      // const session = <Session>(
-      //   (<unknown>await this.sessionRepository.findSessionByToken(token))
-      // );
+      const session = <Session>(
+        (<unknown>await this.sessionRepository.findSessionByToken(token))
+      );
 
-      // if (session) {
-      //   user = await this.userRepository.findById(userProfile[securityId]);
-      // }
+      if (session) {
+        user = await this.userRepository.findById(userProfile[securityId]);
+      }
 
-      // // check if session is locked
-      // if (!session || !user) {
-      //   throw new HttpErrors.Unauthorized();
-      // }
+      // check if session is locked
+      if (!session || !user) {
+        throw new HttpErrors.Unauthorized();
+      }
 
       return {
         user,
-        // session
+        session
       };
     } catch (err: any) {
       throw new HttpErrors.Unauthorized();
