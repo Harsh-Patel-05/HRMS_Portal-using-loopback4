@@ -7,6 +7,7 @@ import {genSalt, hash} from 'bcryptjs';
 import {DateTime} from 'luxon';
 import {Session, User} from '../models';
 import {
+  ForgotpasswordRepository,
   // ForgotpasswordRepository,
   SessionRepository,
   UserCredentialsRepository,
@@ -26,8 +27,8 @@ export class AuthController {
     @service(UserService)
     public userService: UserService,
     @inject(RestBindings.Http.REQUEST) private request: Request,
-    // @repository(ForgotpasswordRepository)
-    // public forgotpasswordRepository: ForgotpasswordRepository,
+    @repository(ForgotpasswordRepository)
+    public forgotpasswordRepository: ForgotpasswordRepository,
   ) { }
 
   //Sign up API Endpoint
@@ -299,84 +300,84 @@ export class AuthController {
   }
 
   //Forgot-Password API Endpoint
-  // @post('/forgot-password', {
-  //   summary: 'Forgot password API Endpoint',
-  //   responses: {
-  //     '200': {},
-  //   },
-  // })
-  // async forgotPassword(@requestBody({
-  //   description: 'Forgot password API Endpoint',
-  //   content: {
-  //     'application/json': {
-  //       schema: {
-  //         required: ['email'],
-  //         properties: {
-  //           email: {
-  //             type: 'string',
-  //             format: 'email',
-  //             maxLength: 254,
-  //             minLength: 5,
-  //           },
-  //         },
-  //       },
-  //     },
-  //   },
-  // })
-  // payload: {
-  //   email: string;
-  // }): Promise<void> {
-  //   return this.userService.forgotpassword(payload.email);
-  // }
+  @post('/forgot-password', {
+    summary: 'Forgot password API Endpoint',
+    responses: {
+      '200': {},
+    },
+  })
+  async forgotPassword(@requestBody({
+    description: 'Forgot password API Endpoint',
+    content: {
+      'application/json': {
+        schema: {
+          required: ['email'],
+          properties: {
+            email: {
+              type: 'string',
+              format: 'email',
+              maxLength: 254,
+              minLength: 5,
+            },
+          },
+        },
+      },
+    },
+  })
+  payload: {
+    email: string;
+  }): Promise<void> {
+    return this.userService.forgotpassword(payload.email);
+  }
 
   //Reset-Password OTP API Endpoint
-  // @post('/reset-password', {
-  //   summary: 'Reset password API Endpoint',
-  //   responses: {
-  //     '200': {},
-  //   },
-  // })
-  // async resetPassword(@requestBody({
-  //   description: 'Reset password API Endpoint',
-  //   content: {
-  //     'application/json': {
-  //       schema: {
-  //         required: ['token', 'newpassword'],
-  //         properties: {
-  //           token: {type: 'string'},
-  //           newpassword: {type: 'string'}
-  //         },
-  //       },
-  //     },
-  //   },
-  // })
-  // payload: {
-  //   token: string;
-  //   newpassword: string;
-  // }) {
+  @post('/reset-password', {
+    summary: 'Reset password API Endpoint',
+    responses: {
+      '200': {},
+    },
+  })
+  async resetPassword(@requestBody({
+    description: 'Reset password API Endpoint',
+    content: {
+      'application/json': {
+        schema: {
+          required: ['token', 'newpassword'],
+          properties: {
+            token: {type: 'string'},
+            newpassword: {type: 'string'}
+          },
+        },
+      },
+    },
+  })
+  payload: {
+    token: string;
+    newpassword: string;
+  }) {
 
-  //   // Verify the reset token
-  //   const user = await this.forgotpasswordRepository.findOne({
-  //     where: {
-  //       token: payload.token,
-  //     }
-  //   });
+    // Verify the reset token
+    const user = await this.forgotpasswordRepository.findOne({
+      where: {
+        token: payload.token,
+      }
+    });
 
-  //   if (user?.token !== payload.token) {
-  //     throw new HttpErrors.BadRequest('Invalid reset token');
-  //   }
+    if (user?.token !== payload.token) {
+      throw new HttpErrors.BadRequest('Invalid reset token');
+    }
 
-  //   // Hash the new password
-  //   const hashedPassword = await hash(payload.newpassword, await genSalt());
-  //   const updatepass = await this.userCredentialsRepository.updateAll({
-  //     password: hashedPassword,
-  //   });
+    // Hash the new password
+    const hashedPassword = await hash(payload.newpassword, await genSalt());
+    const updatepass = await this.userCredentialsRepository.updateAll({
+      password: hashedPassword,
+    });
 
-  //   const updateUser = await this.userRepository.updateById
+    const updateUser = await this.userRepository.updateById
 
-  //   return {
-  //     statusCode: 200,
-  //     message: 'Password updated successfully',
-  //   }
-  // }
+    return {
+      statusCode: 200,
+      message: 'Password updated successfully',
+    }
+  }
 }

@@ -10,6 +10,7 @@ import otpGenerator from 'otp-generator';
 import {TokenServiceBindings} from '../keys';
 import {User} from '../models';
 import {
+  ForgotpasswordRepository,
   // ForgotpasswordRepository,
   SessionRepository,
   UserCredentialsRepository,
@@ -34,8 +35,8 @@ export class UserService {
     public userCredentialsRepository: UserCredentialsRepository,
     @inject(TokenServiceBindings.TOKEN_SERVICE)
     public jwtService: TokenService,
-    // @repository(ForgotpasswordRepository)
-    // public forgotpasswordRepository: ForgotpasswordRepository,
+    @repository(ForgotpasswordRepository)
+    public forgotpasswordRepository: ForgotpasswordRepository,
   ) { }
 
   //verify Credentials service method
@@ -263,117 +264,52 @@ export class UserService {
     });
   }
 
-  // async forgotpassword(email: string) {
-  //   const sgMail = require('@sendgrid/mail');
-  //   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  async forgotpassword(email: string) {
+    const sgMail = require('@sendgrid/mail');
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-  //   const expirationTime = new Date();
-  //   expirationTime.setHours(expirationTime.getHours() + 2);
-  //   const resetToken = otpGenerator.generate(40, {digits: true, lowerCaseAlphabets: true, upperCaseAlphabets: true});
+    const expirationTime = new Date();
+    expirationTime.setHours(expirationTime.getHours() + 2);
+    const resetToken = otpGenerator.generate(40, {digits: true, lowerCaseAlphabets: true, upperCaseAlphabets: true});
 
-  //   const user = await this.userRepository.findOne({
-  //     where: {
-  //       email
-  //     }
-  //   });
-  //   if (!user) {
-  //     // User with the provided email not found
-  //     throw new HttpErrors.NotFound('User not found');
-  //   }
+    const user = await this.userRepository.findOne({
+      where: {
+        email
+      }
+    });
+    if (!user) {
+      // User with the provided email not found
+      throw new HttpErrors.NotFound('User not found');
+    }
 
-  //   // const resetLink = `http://localhost:3000/explorer/#/AuthController/AuthController.resetPassword/${resetToken}`;
+    // const resetLink = `http://localhost:3000/explorer/#/AuthController/AuthController.resetPassword/${resetToken}`;
 
-  //   /* Send OTP via email */
-  //   const msg = {
-  //     to: email,
-  //     from: 'harsh.abstud@gmail.com',
-  //     subject: 'ResetPassword Token',
-  //     html: `<p style="color:black; font-size:25px;letter-spacing:2px;">ResetPassword Token is: <b>${resetToken}</b></p>`
-  //   };
+    /* Send OTP via email */
+    const msg = {
+      to: email,
+      from: 'harsh.abstud@gmail.com',
+      subject: 'ResetPassword Token',
+      html: `<p style="color:black; font-size:25px;letter-spacing:2px;">ResetPassword Token is: <b>${resetToken}</b></p>`
+    };
 
-  //   // update userCredentials
-  //   const password = await this.forgotpasswordRepository.create({
-  //     token: resetToken,
-  //     expireAt: expirationTime
-  //   });
+    // update userCredentials
+    const password = await this.forgotpasswordRepository.create({
+      token: resetToken,
+      expireAt: expirationTime
+    });
 
 
-  //   return await sgMail.send(msg).then(() => {
-  //     return {
-  //       statusCode: 200,
-  //       message: 'ResetPassword Token is sent successfully',
-  //       password
-  //     };
-  //   }).catch(() => {
-  //     return {
-  //       statusCode: 400,
-  //       message: 'ResetPassword Token is not sent, Error !',
-  //     };
-  //   });
-  // }
-
-  // async generateAndSetOtp(userId: string, forceNewOtp = true) {
-  //   //check for the user
-  //   const user = await this.userRepository.findById(userId, {
-  //     include: ['userCredentials'],
-  //   });
-
-  //   if (user) {
-  //     if (forceNewOtp) {
-  //       return this.sendOtp({
-  //         userCredentialsId: user?.userCredentials?.id,
-  //         user,
-  //       });
-  //     } else {
-  //       // if forceNewOtp is false then check for the expire time for otp
-  //       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //       const expiredAt: any = user?.userCredentials?.security?.expiredAt;
-  //       const expiredAtTimestamp = DateTime.fromJSDate(expiredAt).toMillis();
-  //       const expiredAtOneMinuteBefore = DateTime.fromMillis(expiredAtTimestamp)
-  //         .minus({
-  //           minutes: 1,
-  //         })
-  //         .toMillis();
-
-  //       const currentTimeStamp = DateTime.utc().toMillis();
-  //       if (currentTimeStamp <= expiredAtOneMinuteBefore) {
-  //         //if otp is not expired then return otp from model
-  //         return {
-  //           otp: user.userCredentials.security?.otp,
-  //           otpReference: user.userCredentials.security?.otpRef,
-  //         };
-  //       } else {
-  //         return this.sendOtp({
-  //           userCredentialsId: user?.userCredentials?.id,
-  //           user,
-  //         });
-  //       }
-  //     }
-  //   } else {
-  //     throw new HttpErrors.NotFound('User not found');
-  //   }
-  // }
-
-  // async sendOtp(params: {userCredentialsId: string; user: any}) {
-  //   const {userCredentialsId} = params;
-  //   const otp = generateRandomOtp(6);
-  //   const otpReference = generateRandomString(6);
-
-  //   const security = {
-  //     otp: otp,
-  //     otpRef: otpReference,
-  //     generatedAt: new Date(Date.now()),
-  //     expiredAt: DateTime.utc().plus({minutes: 2}),
-  //   };
-
-  //   // update userCredentials
-  //   await this.userCredentialsRepository.updateById(userCredentialsId, {
-  //     // security,
-  //   });
-
-  //   return {
-  //     otp,
-  //     otpReference,
-  //   };
-  // }
+    return await sgMail.send(msg).then(() => {
+      return {
+        statusCode: 200,
+        message: 'ResetPassword Token is sent successfully',
+        password
+      };
+    }).catch(() => {
+      return {
+        statusCode: 400,
+        message: 'ResetPassword Token is not sent, Error !',
+      };
+    });
+  }
 }
