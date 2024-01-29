@@ -20,7 +20,7 @@ export class EmployeeController {
     public departmentRepository: DepartmentRepository,
   ) { }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @post('/employees', {
     summary: 'Create employees API Endpoint',
     responses: {
@@ -97,7 +97,7 @@ export class EmployeeController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @get('/employees/count', {
     summary: 'Count employees API Endpoint',
     responses: {
@@ -126,7 +126,7 @@ export class EmployeeController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @get('/employees', {
     summary: 'List of employees API Endpoint',
     responses: {
@@ -154,7 +154,7 @@ export class EmployeeController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @get('/employees/{id}', {
     summary: 'Get employees by Id API Endpoint',
     responses: {
@@ -185,7 +185,7 @@ export class EmployeeController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @patch('/employees/{id}', {
     summary: 'Update employees API Endpoint',
     responses: {
@@ -261,7 +261,7 @@ export class EmployeeController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @del('/employees/{id}', {
     summary: 'Delete employees API Endpoint',
     responses: {

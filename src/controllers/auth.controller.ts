@@ -55,6 +55,10 @@ export class AuthController {
               password: {
                 type: 'string',
                 minLength: 8,
+                pattern: '^(?! ).*[^ ]$',
+                errorMessage: {
+                  pattern: `Invalid input.`,
+                },
               },
             },
           },
@@ -140,18 +144,12 @@ export class AuthController {
       password: string;
     },
   ) {
-    // : Promise<object>
     const user = await this.userService.verifyCredentials(payload);
     // if (user.status === 'active') {
     const otpReference = await this.userService.sendOtp(user.email, user.id);
     return {
       otpReference,
     };
-    // }
-    // return {
-    //   statusCode: 404,
-    //   message: 'user not found'
-    // }
   }
 
   // //Verify OTP API Endpoint

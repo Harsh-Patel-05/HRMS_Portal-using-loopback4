@@ -18,7 +18,7 @@ export class OrganizationController {
     public organizationRepository: OrganizationRepository,
   ) { }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @post('/organizations', {
     summary: 'Create organizations API Endpoint',
     responses: {
@@ -90,7 +90,7 @@ export class OrganizationController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @get('/organizations/count', {
     summary: 'Count organizations API Endpoint',
     responses: {
@@ -120,7 +120,7 @@ export class OrganizationController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @get('/organizations', {
     summary: 'List of student API Endpoint',
     responses: {
@@ -148,7 +148,7 @@ export class OrganizationController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @get('/organizations/{id}', {
     summary: 'Get organizations by id API Endpoint',
     responses: {
@@ -179,7 +179,7 @@ export class OrganizationController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @patch('/organizations/{id}', {
     summary: 'Update organizations API Endpoint',
     responses: {
@@ -265,7 +265,7 @@ export class OrganizationController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @del('/organizations/{id}', {
     summary: 'Delete organizations API Endpoint',
     responses: {

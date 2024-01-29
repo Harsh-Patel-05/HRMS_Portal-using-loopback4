@@ -20,7 +20,7 @@ export class AttendanceController {
     public employeeRepository: EmployeeRepository,
   ) { }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @post('/attendances', {
     summary: 'Create attendances API Endpoint',
     responses: {
@@ -81,7 +81,7 @@ export class AttendanceController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @get('/attendances/count', {
     summary: 'Count attendances API Endpoint',
     responses: {
@@ -110,7 +110,7 @@ export class AttendanceController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @get('/attendances', {
     summary: 'List of attendances API Endpoint',
     responses: {
@@ -138,7 +138,7 @@ export class AttendanceController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @get('/attendances/{id}', {
     summary: 'Get attendances by Id API Endpoint',
     responses: {
@@ -169,7 +169,7 @@ export class AttendanceController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @patch('/attendances/{id}', {
     summary: 'Update attendances API Endpoint',
     responses: {
@@ -230,7 +230,7 @@ export class AttendanceController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @del('/attendances/{id}', {
     summary: 'Delete attendances API Endpoint',
     responses: {

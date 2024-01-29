@@ -20,7 +20,7 @@ export class DepartmentController {
     public organizationRepository: OrganizationRepository,
   ) { }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @post('/departments', {
     summary: 'Create departments API Endpoint',
     responses: {
@@ -72,7 +72,7 @@ export class DepartmentController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @get('/departments/count', {
     summary: 'Count departments API Endpoint',
     responses: {
@@ -101,7 +101,7 @@ export class DepartmentController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @get('/departments', {
     summary: 'List of departments API Endpoint',
     responses: {
@@ -129,7 +129,7 @@ export class DepartmentController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @get('/departments/{id}', {
     summary: 'Get departments by Id API Endpoint',
     responses: {
@@ -160,7 +160,7 @@ export class DepartmentController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @patch('/departments/{id}', {
     summary: 'Update departments API Endpoint',
     responses: {
@@ -214,7 +214,7 @@ export class DepartmentController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @del('/departments/{id}', {
     summary: 'Delete departments API Endpoint',
     responses: {

@@ -20,7 +20,7 @@ export class LeaveRequestController {
     public employeeRepository: EmployeeRepository,
   ) { }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @post('/leave-requests', {
     summary: 'Create leave-requests API Endpoint',
     responses: {
@@ -79,7 +79,7 @@ export class LeaveRequestController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @get('/leave-requests/count', {
     summary: 'Count leave-requests API Endpoint',
     responses: {
@@ -108,7 +108,7 @@ export class LeaveRequestController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @get('/leave-requests', {
     summary: 'List of leave-requests API Endpoint',
     responses: {
@@ -136,7 +136,7 @@ export class LeaveRequestController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @get('/leave-requests/{id}', {
     summary: 'Get leave-requests by Id API Endpoint',
     responses: {
@@ -144,7 +144,7 @@ export class LeaveRequestController {
     }
   })
   async findById(
-    @param.path.number('id') id: string,
+    @param.path.string('id') id: string,
   ) {
     const data = await this.leaveRequestRepository.findOne({
       where: {
@@ -167,7 +167,7 @@ export class LeaveRequestController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @patch('/leave-requests/{id}', {
     summary: 'Update leave-requests API Endpoint',
     responses: {
@@ -175,7 +175,7 @@ export class LeaveRequestController {
     }
   })
   async updateById(
-    @param.path.number('id') id: string,
+    @param.path.string('id') id: string,
     @requestBody({
       description: 'Update leave-requests API Endpoint',
       content: {
@@ -229,14 +229,14 @@ export class LeaveRequestController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @del('/leave-requests/{id}', {
     summary: 'Delete leave-requests API Endpoint',
     responses: {
       '200': {},
     },
   })
-  async deleteById(@param.path.number('id') id: string) {
+  async deleteById(@param.path.string('id') id: string) {
     const data = await this.leaveRequestRepository.findOne({
       where: {
         id,
