@@ -4,3 +4,6 @@ export * from './session.repository';
 export * from './forgotpassword.repository';
 export * from './organization.repository';
 export * from './department.repository';
+export * from './employee.repository';
+export * from './leave-request.repository';
+export * from './attendance.repository';

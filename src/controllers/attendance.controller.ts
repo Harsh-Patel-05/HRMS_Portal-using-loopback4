@@ -1,86 +1,95 @@
 import {
-  repository
+  repository,
 } from '@loopback/repository';
 import {
   post,
-  del,
-  get,
-  requestBody,
   param,
-  patch
+  get,
+  patch,
+  del,
+  requestBody,
 } from '@loopback/rest';
-import {DepartmentRepository, OrganizationRepository} from '../repositories';
+import {AttendanceRepository, EmployeeRepository} from '../repositories';
 import {authenticate} from '@loopback/authentication';
 
-export class DepartmentController {
+export class AttendanceController {
   constructor(
-    @repository(DepartmentRepository)
-    public departmentRepository: DepartmentRepository,
-    @repository(OrganizationRepository)
-    public organizationRepository: OrganizationRepository,
+    @repository(AttendanceRepository)
+    public attendanceRepository: AttendanceRepository,
+    @repository(EmployeeRepository)
+    public employeeRepository: EmployeeRepository,
   ) { }
 
   // @authenticate('jwt')
-  @post('/departments', {
-    summary: 'Create departments API Endpoint',
+  @post('/attendances', {
+    summary: 'Create attendances API Endpoint',
     responses: {
       '200': {},
     },
   })
   async create(
     @requestBody({
-      description: 'Create departments API Endpoint',
+      description: 'Create attendances API Endpoint',
       content: {
         'application/json': {
           schema: {
-            required: ['name', 'orgId'],
+            required: ['empId', 'att_date', 'clock_in', 'clock_out'],
             properties: {
-              name: {
+              empId: {
                 type: 'string',
               },
-              orgId: {
+              att_date: {
                 type: 'string',
-              }
+              },
+              clock_in: {
+                type: 'string',
+              },
+              clock_out: {
+                type: 'string',
+              },
             }
           }
         },
       },
     })
     payload: {
-      name: 'string',
-      orgId: 'string',
+      empId: 'string',
+      att_date: 'string',
+      clock_in: 'string',
+      clock_out: 'string',
     }
   ) {
-    const organization = await this.organizationRepository.findOne({
+    const employee = await this.employeeRepository.findOne({
       where: {
-        id: payload.orgId,
-        isDeleted: false
+        id: payload.empId,
+        isDeleted: false,
       }
-    })
-    if (organization) {
-      const data = await this.departmentRepository.create(payload);
+    });
+
+    if (employee) {
+      const result = await this.attendanceRepository.create(payload);
       return {
         statusCode: 200,
         message: 'created successfully',
-        data
+        result
       }
     } else {
       return {
-        statusCode: 400,
-        message: 'can not found organization',
+        statusCode: 404,
+        message: 'can not found department',
       }
     }
   }
 
   // @authenticate('jwt')
-  @get('/departments/count', {
-    summary: 'Count departments API Endpoint',
+  @get('/attendances/count', {
+    summary: 'Count attendances API Endpoint',
     responses: {
       '200': {},
     },
   })
   async count() {
-    const data = await this.departmentRepository.find({
+    const data = await this.attendanceRepository.find({
       where: {
         isDeleted: false,
       }
@@ -102,14 +111,14 @@ export class DepartmentController {
   }
 
   // @authenticate('jwt')
-  @get('/departments', {
-    summary: 'List of departments API Endpoint',
+  @get('/attendances', {
+    summary: 'List of attendances API Endpoint',
     responses: {
       '200': {}
     }
   })
   async find() {
-    const data = await this.departmentRepository.find({
+    const data = await this.attendanceRepository.find({
       where: {
         isDeleted: false
       }
@@ -118,7 +127,7 @@ export class DepartmentController {
     if (!data[0]) {
       return {
         statusCode: 404,
-        message: 'data not found',
+        message: 'Data not found'
       }
     }
 
@@ -130,8 +139,8 @@ export class DepartmentController {
   }
 
   // @authenticate('jwt')
-  @get('/departments/{id}', {
-    summary: 'Get departments by Id API Endpoint',
+  @get('/attendances/{id}', {
+    summary: 'Get attendances by Id API Endpoint',
     responses: {
       '200': {}
     }
@@ -139,11 +148,11 @@ export class DepartmentController {
   async findById(
     @param.path.string('id') id: string,
   ) {
-    const data = await this.departmentRepository.findOne({
+    const data = await this.attendanceRepository.findOne({
       where: {
         id,
         isDeleted: false
-      },
+      }
     });
 
     if (!data) {
@@ -161,8 +170,8 @@ export class DepartmentController {
   }
 
   // @authenticate('jwt')
-  @patch('/departments/{id}', {
-    summary: 'Update departments API Endpoint',
+  @patch('/attendances/{id}', {
+    summary: 'Update attendances API Endpoint',
     responses: {
       '200': {}
     }
@@ -170,59 +179,66 @@ export class DepartmentController {
   async updateById(
     @param.path.string('id') id: string,
     @requestBody({
-      description: 'Create departments API Endpoint',
+      description: 'Update attendances API Endpoint',
       content: {
         'application/json': {
           schema: {
-            // required: ['name', 'orgId'],
+            // required: ['empId', 'att_date', 'clock_in', 'clock_out'],
             properties: {
-              name: {
+              empId: {
                 type: 'string',
               },
-              orgId: {
+              att_date: {
                 type: 'string',
-              }
+              },
+              clock_in: {
+                type: 'string',
+              },
+              clock_out: {
+                type: 'string',
+              },
             }
           }
         },
       },
     })
     payload: {
-      name: 'string',
-      orgId: 'string',
+      empId: 'string',
+      att_date: 'string',
+      clock_in: 'string',
+      clock_out: 'string',
     }
   ) {
-    const data = await this.departmentRepository.findOne({
+    const data = await this.attendanceRepository.findOne({
       where: {
         id,
-        isDeleted: false
+        isDeleted: false,
       }
     })
-
-    if (data) {
-      const result = await this.departmentRepository.updateById(data.id, payload);
-      return {
-        statusCode: 200,
-        message: 'Success',
-        result
-      }
-    } else {
+    if (!data) {
       return {
         statusCode: 404,
-        message: 'data not found',
+        message: 'data not found'
       }
+    }
+
+    const result = await this.attendanceRepository.updateById(data.id, payload);
+    return {
+      statusCode: 200,
+      message: 'success',
+      result
     }
   }
 
   // @authenticate('jwt')
-  @del('/departments/{id}', {
-    summary: 'Delete departments API Endpoint',
+  @del('/attendances/{id}', {
+    summary: 'Delete attendances API Endpoint',
     responses: {
       '200': {},
     },
   })
   async deleteById(@param.path.string('id') id: string) {
-    const data = await this.departmentRepository.findOne({
+    const data = await this.attendanceRepository.findOne({
       where: {
         id,
         isDeleted: false
@@ -230,7 +246,7 @@ export class DepartmentController {
     })
 
     if (data) {
-      const result = await this.departmentRepository.updateById(id, {
+      const result = await this.attendanceRepository.updateById(data.id, {
         isDeleted: true
       });
       return {
@@ -241,7 +257,7 @@ export class DepartmentController {
     } else {
       return {
         statusCode: 404,
-        message: 'Departments data already deleted'
+        message: 'Attendances data already deleted'
       }
     }
   }

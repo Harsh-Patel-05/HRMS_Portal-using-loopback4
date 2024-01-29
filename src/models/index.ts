@@ -4,3 +4,6 @@ export * from './session.model';
 export * from './temp-reset-token.model';
 export * from './organization.model';
 export * from './department.model';
+export * from './employee.model';
+export * from './leave-request.model';
+export * from './attendance.model';

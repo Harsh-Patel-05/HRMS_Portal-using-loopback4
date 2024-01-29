@@ -1,14 +1,15 @@
-import {Entity, belongsTo, model, property} from '@loopback/repository';
-import {User} from './user.model';
+import {Entity, belongsTo, hasOne, model, property} from '@loopback/repository';
+import {Department} from './department.model';
 import {DateTime} from 'luxon';
-import {Loopback4BoilerplatePublicConstants} from '../keys';
+import {LeaveRequest} from './leave-request.model';
+import {Attendance} from './attendance.model';
 
 @model({
   settings: {
     strictObjectIDCoercion: true,
   },
 })
-export class Session extends Entity {
+export class Employee extends Entity {
   @property({
     type: 'string',
     id: true,
@@ -18,10 +19,10 @@ export class Session extends Entity {
   id: string;
 
   @belongsTo(
-    () => User,
+    () => Department,
     {
       //relation metadata
-      name: 'user',
+      name: 'department',
     },
     {
       // property definition
@@ -30,51 +31,59 @@ export class Session extends Entity {
       mongodb: {dataType: 'ObjectId'},
     },
   )
-  userId: string;
+  depId: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  firstName: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  lastName: string;
 
   @property({
     type: 'string',
     required: true,
     jsonSchema: {
+      format: 'email',
+      transform: ['trim'],
+      maxLength: 254,
+      minLength: 5,
       pattern: '^(?! ).*[^ ]$',
       errorMessage: {
         pattern: `Invalid input.`,
       },
     },
   })
-  accessToken: string;
+  email: string;
+
+  @property({
+    type: 'number',
+    required: true,
+  })
+  phone: number;
 
   @property({
     type: 'string',
     required: true,
-    jsonSchema: {
-      enum: Object.values(Loopback4BoilerplatePublicConstants.SessionStatus),
-      pattern: '^(?! ).*[^ ]$',
-      errorMessage: {
-        pattern: `Invalid input.`,
-      },
-    },
-    default: Loopback4BoilerplatePublicConstants.SessionStatus.CURRENT,
   })
-  status: string;
+  hire_date: string;
 
   @property({
-    type: 'date',
+    type: 'number',
     required: true,
   })
-  loginAt: DateTime;
+  salary: number;
 
   @property({
-    type: 'date',
-    required: true,
+    type: 'boolean',
+    default: false,
   })
-  expireAt: Date;
-
-  @property({
-    type: 'date',
-    default: null,
-  })
-  expiredAt: Date;
+  isDeleted?: boolean;
 
   @property({
     type: 'date',
@@ -88,14 +97,20 @@ export class Session extends Entity {
   })
   updatedAt?: DateTime;
 
+  @hasOne(() => LeaveRequest)
+  leaveRequest: LeaveRequest;
 
-  constructor(data?: Partial<Session>) {
+  @hasOne(() => Attendance)
+  attendance: Attendance;
+
+
+  constructor(data?: Partial<Employee>) {
     super(data);
   }
 }
 
-export interface SessionRelations {
+export interface EmployeeRelations {
   // describe navigational properties here
 }
 
-export type SessionWithRelations = Session & SessionRelations;
+export type EmployeeWithRelations = Employee & EmployeeRelations;

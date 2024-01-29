@@ -1,8 +1,13 @@
-import {Entity, belongsTo, model, property} from '@loopback/repository';
+import {Entity, belongsTo, hasOne, model, property} from '@loopback/repository';
 import {Organization} from './organization.model';
 import {DateTime} from 'luxon';
+import {Employee} from './employee.model';
 
-@model()
+@model({
+  settings: {
+    strictObjectIDCoercion: true,
+  },
+})
 export class Department extends Entity {
   @property({
     type: 'string',
@@ -50,6 +55,9 @@ export class Department extends Entity {
     default: () => DateTime.utc().toJSDate(),
   })
   updatedAt?: DateTime;
+
+  @hasOne(() => Employee)
+  employee: Employee;
 
   constructor(data?: Partial<Department>) {
     super(data);

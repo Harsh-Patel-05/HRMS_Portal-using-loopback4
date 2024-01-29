@@ -1,14 +1,13 @@
 import {Entity, belongsTo, model, property} from '@loopback/repository';
-import {User} from './user.model';
+import {Employee} from './employee.model';
 import {DateTime} from 'luxon';
-import {Loopback4BoilerplatePublicConstants} from '../keys';
 
 @model({
   settings: {
     strictObjectIDCoercion: true,
   },
 })
-export class Session extends Entity {
+export class LeaveRequest extends Entity {
   @property({
     type: 'string',
     id: true,
@@ -18,10 +17,10 @@ export class Session extends Entity {
   id: string;
 
   @belongsTo(
-    () => User,
+    () => Employee,
     {
       //relation metadata
-      name: 'user',
+      name: 'employee',
     },
     {
       // property definition
@@ -30,51 +29,31 @@ export class Session extends Entity {
       mongodb: {dataType: 'ObjectId'},
     },
   )
-  userId: string;
+  empId: string;
 
   @property({
     type: 'string',
     required: true,
-    jsonSchema: {
-      pattern: '^(?! ).*[^ ]$',
-      errorMessage: {
-        pattern: `Invalid input.`,
-      },
-    },
   })
-  accessToken: string;
+  start_date: string;
 
   @property({
     type: 'string',
     required: true,
-    jsonSchema: {
-      enum: Object.values(Loopback4BoilerplatePublicConstants.SessionStatus),
-      pattern: '^(?! ).*[^ ]$',
-      errorMessage: {
-        pattern: `Invalid input.`,
-      },
-    },
-    default: Loopback4BoilerplatePublicConstants.SessionStatus.CURRENT,
   })
-  status: string;
+  end_date: string;
 
   @property({
-    type: 'date',
+    type: 'string',
     required: true,
   })
-  loginAt: DateTime;
+  leave_type: string;
 
   @property({
-    type: 'date',
-    required: true,
+    type: 'boolean',
+    default: false,
   })
-  expireAt: Date;
-
-  @property({
-    type: 'date',
-    default: null,
-  })
-  expiredAt: Date;
+  isDeleted?: boolean;
 
   @property({
     type: 'date',
@@ -88,14 +67,13 @@ export class Session extends Entity {
   })
   updatedAt?: DateTime;
 
-
-  constructor(data?: Partial<Session>) {
+  constructor(data?: Partial<LeaveRequest>) {
     super(data);
   }
 }
 
-export interface SessionRelations {
+export interface LeaveRequestRelations {
   // describe navigational properties here
 }
 
-export type SessionWithRelations = Session & SessionRelations;
+export type LeaveRequestWithRelations = LeaveRequest & LeaveRequestRelations;

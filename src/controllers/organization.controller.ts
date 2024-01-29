@@ -1,18 +1,14 @@
 import {
-  FilterExcludingWhere,
   repository
 } from '@loopback/repository';
 import {
   del,
   get,
-  getModelSchemaRef,
   param,
   patch,
   post,
   requestBody,
-  response,
 } from '@loopback/rest';
-import {Organization} from '../models';
 import {OrganizationRepository} from '../repositories';
 import {authenticate} from '@loopback/authentication';
 
@@ -74,8 +70,8 @@ export class OrganizationController {
       city: 'string',
       state: 'string',
       zipcode: 'string'
-    }): Promise<Organization> {
-    return this.organizationRepository.create({
+    }) {
+    const data = await this.organizationRepository.create({
       org_name: payload.org_name,
       email: payload.email,
       phone: payload.phone,
@@ -86,6 +82,12 @@ export class OrganizationController {
         zipcode: payload.zipcode,
       }
     });
+
+    return {
+      statusCode: 200,
+      message: 'created successfully',
+      data
+    }
   }
 
   // @authenticate('jwt')
@@ -239,7 +241,7 @@ export class OrganizationController {
     });
 
     if (data) {
-      const result = await this.organizationRepository.updateById(id, {
+      const result = await this.organizationRepository.updateById(data.id, {
         org_name: payload.org_name,
         email: payload.email,
         phone: payload.phone,

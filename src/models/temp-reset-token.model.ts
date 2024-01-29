@@ -1,7 +1,11 @@
 import {Entity, model, property} from '@loopback/repository';
 import {DateTime} from 'luxon';
 
-@model()
+@model({
+  settings: {
+    strictObjectIDCoercion: true,
+  },
+})
 export class TempResetToken extends Entity {
   @property({
     type: 'string',

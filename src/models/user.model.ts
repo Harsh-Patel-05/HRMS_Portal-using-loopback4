@@ -2,7 +2,11 @@ import {Entity, hasOne, model, property} from '@loopback/repository';
 import {DateTime} from 'luxon';
 import {UserCredentials} from './user-credentials.model';
 
-@model()
+@model({
+  settings: {
+    strictObjectIDCoercion: true,
+  },
+})
 export class User extends Entity {
   @property({
     type: 'string',

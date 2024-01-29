@@ -32,7 +32,12 @@ export class Security extends Model {
     super(data);
   }
 }
-@model()
+
+@model({
+  settings: {
+    strictObjectIDCoercion: true,
+  },
+})
 export class UserCredentials extends Entity {
   @property({
     type: 'string',
