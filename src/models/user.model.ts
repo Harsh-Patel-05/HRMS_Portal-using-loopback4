@@ -19,6 +19,12 @@ export class User extends Entity {
   @property({
     type: 'string',
     required: true,
+  })
+  name: string;
+
+  @property({
+    type: 'string',
+    required: true,
     jsonSchema: {
       format: 'email',
       transform: ['trim'],
@@ -33,13 +39,21 @@ export class User extends Entity {
   email: string;
 
   @property({
-    type: 'date',
-    default: null,
-    jsonSchema: {
-      nullable: true,
-    },
+    type: 'string',
+    required: false,
+    default: "employee",
   })
-  tokenExpireAt?: DateTime | null;
+  role: string;
+
+
+  // @property({
+  //   type: 'date',
+  //   default: null,
+  //   jsonSchema: {
+  //     nullable: true,
+  //   },
+  // })
+  // tokenExpireAt?: DateTime | null;
 
   @property({
     type: 'date',

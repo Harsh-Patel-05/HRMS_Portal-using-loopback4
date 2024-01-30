@@ -44,8 +44,11 @@ export class AuthController {
       content: {
         'application/json': {
           schema: {
-            required: ['email', 'password'],
+            required: ['name', 'email', 'password'],
             properties: {
+              name: {
+                type: 'string',
+              },
               email: {
                 type: 'string',
                 format: 'email',
@@ -66,12 +69,14 @@ export class AuthController {
       },
     })
     payload: {
+      name: string,
       email: string;
       password: string;
     },
-  ): Promise<User> {
-    const {email, password} = payload;
+  ) {
+    const {name, email, password} = payload;
     const user = await this.userRepository.create({
+      name,
       email,
       // password,
       // status: 'active',
@@ -81,6 +86,12 @@ export class AuthController {
       userId: user.id,
       password: hashedPassword,
     });
+    if (user.role === 'admin') {
+      return {
+        statusCode: 404,
+        message: 'you are not allowed to',
+      }
+    }
     return user;
   }
 
@@ -145,7 +156,6 @@ export class AuthController {
     },
   ) {
     const user = await this.userService.verifyCredentials(payload);
-    // if (user.status === 'active') {
     const otpReference = await this.userService.sendOtp(user.email, user.id);
     return {
       otpReference,
