@@ -11,13 +11,13 @@ import {
 } from '@loopback/rest';
 import {AttendanceRepository, EmployeeRepository} from '../repositories';
 import {authenticate} from '@loopback/authentication';
+import {service} from '@loopback/core';
+import {AttendanceService} from '../services';
 
 export class AttendanceController {
   constructor(
-    @repository(AttendanceRepository)
-    public attendanceRepository: AttendanceRepository,
-    @repository(EmployeeRepository)
-    public employeeRepository: EmployeeRepository,
+    @service(AttendanceService)
+    public attendanceService: AttendanceService
   ) { }
 
   @authenticate('jwt')
@@ -25,6 +25,7 @@ export class AttendanceController {
     summary: 'Create attendances API Endpoint',
     responses: {
       '200': {},
+      '404': {description: 'Cannot find employee'},
     },
   })
   async create(
@@ -35,50 +36,32 @@ export class AttendanceController {
           schema: {
             required: ['empId', 'att_date', 'clock_in', 'clock_out'],
             properties: {
-              empId: {
-                type: 'string',
-              },
-              att_date: {
-                type: 'string',
-              },
-              clock_in: {
-                type: 'string',
-              },
-              clock_out: {
-                type: 'string',
-              },
-            }
-          }
+              empId: {type: 'string'},
+              att_date: {type: 'string'},
+              clock_in: {type: 'string'},
+              clock_out: {type: 'string'},
+            },
+          },
         },
       },
     })
     payload: {
-      empId: 'string',
-      att_date: 'string',
-      clock_in: 'string',
-      clock_out: 'string',
-    }
+      empId: string;
+      att_date: string;
+      clock_in: string;
+      clock_out: string;
+    },
   ) {
-    const employee = await this.employeeRepository.findOne({
-      where: {
-        id: payload.empId,
-        isDeleted: false,
-      }
-    });
+    const result = await this.attendanceService.createAttendance(payload);
 
-    if (employee) {
-      const result = await this.attendanceRepository.create(payload);
-      return {
-        statusCode: 200,
-        message: 'created successfully',
-        result
-      }
-    } else {
-      return {
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'can not found department',
-      }
+        message: 'Cannot find employee',
+      };
     }
+
+    return result;
   }
 
   @authenticate('jwt')
@@ -86,95 +69,71 @@ export class AttendanceController {
     summary: 'Count attendances API Endpoint',
     responses: {
       '200': {},
+      '404': {description: 'Data not found'},
     },
   })
   async count() {
-    const data = await this.attendanceRepository.find({
-      where: {
-        isDeleted: false,
-      }
-    });
+    const result = await this.attendanceService.countAttendances();
 
-    if (!data) {
-      return {
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'data not found'
-      }
+        message: 'Data not found',
+      };
     }
 
-    const count = data.length;
-    return {
-      statusCode: 200,
-      message: 'success',
-      count
-    }
+    return result;
   }
 
   @authenticate('jwt')
   @get('/attendances', {
     summary: 'List of attendances API Endpoint',
     responses: {
-      '200': {}
-    }
+      '200': {},
+      '404': {description: 'Data not found'},
+    },
   })
   async find() {
-    const data = await this.attendanceRepository.find({
-      where: {
-        isDeleted: false
-      }
-    });
+    const result = await this.attendanceService.findAttendances();
 
-    if (!data[0]) {
-      return {
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'Data not found'
-      }
+        message: 'Data not found',
+      };
     }
 
-    return {
-      statusCode: 200,
-      message: 'success',
-      data
-    }
+    return result;
   }
 
   @authenticate('jwt')
   @get('/attendances/{id}', {
-    summary: 'Get attendances by Id API Endpoint',
+    summary: 'Get attendances by ID API Endpoint',
     responses: {
-      '200': {}
-    }
+      '200': {},
+      '404': {description: 'Data not found'},
+    },
   })
-  async findById(
-    @param.path.string('id') id: string,
-  ) {
-    const data = await this.attendanceRepository.findOne({
-      where: {
-        id,
-        isDeleted: false
-      }
-    });
+  async findById(@param.path.string('id') id: string) {
+    const result = await this.attendanceService.findAttendanceById(id);
 
-    if (!data) {
-      return {
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'data not found'
-      }
+        message: 'Data not found',
+      };
     }
 
-    return {
-      statusCode: 200,
-      message: 'success',
-      data
-    }
+    return result;
   }
 
   @authenticate('jwt')
   @patch('/attendances/{id}', {
     summary: 'Update attendances API Endpoint',
     responses: {
-      '200': {}
-    }
+      '200': {},
+      '404': {description: 'Data not found'},
+    },
   })
   async updateById(
     @param.path.string('id') id: string,
@@ -183,51 +142,34 @@ export class AttendanceController {
       content: {
         'application/json': {
           schema: {
-            // required: ['empId', 'att_date', 'clock_in', 'clock_out'],
+            required: ['empId', 'att_date', 'clock_in', 'clock_out'],
             properties: {
-              empId: {
-                type: 'string',
-              },
-              att_date: {
-                type: 'string',
-              },
-              clock_in: {
-                type: 'string',
-              },
-              clock_out: {
-                type: 'string',
-              },
-            }
-          }
+              empId: {type: 'string'},
+              att_date: {type: 'string'},
+              clock_in: {type: 'string'},
+              clock_out: {type: 'string'},
+            },
+          },
         },
       },
     })
     payload: {
-      empId: 'string',
-      att_date: 'string',
-      clock_in: 'string',
-      clock_out: 'string',
-    }
+      empId: string;
+      att_date: string;
+      clock_in: string;
+      clock_out: string;
+    },
   ) {
-    const data = await this.attendanceRepository.findOne({
-      where: {
-        id,
-        isDeleted: false,
-      }
-    })
-    if (!data) {
-      return {
+    const result = await this.attendanceService.updateAttendanceById(id, payload);
+
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'data not found'
-      }
+        message: 'Data not found',
+      };
     }
 
-    const result = await this.attendanceRepository.updateById(data.id, payload);
-    return {
-      statusCode: 200,
-      message: 'success',
-      result
-    }
+    return result;
   }
 
   @authenticate('jwt')
@@ -235,30 +177,19 @@ export class AttendanceController {
     summary: 'Delete attendances API Endpoint',
     responses: {
       '200': {},
+      '404': {description: 'Data not found'},
     },
   })
   async deleteById(@param.path.string('id') id: string) {
-    const data = await this.attendanceRepository.findOne({
-      where: {
-        id,
-        isDeleted: false
-      }
-    })
+    const result = await this.attendanceService.deleteAttendanceById(id);
 
-    if (data) {
-      const result = await this.attendanceRepository.updateById(data.id, {
-        isDeleted: true
-      });
-      return {
-        statusCode: 200,
-        message: 'success',
-        result
-      }
-    } else {
-      return {
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'Attendances data already deleted'
-      }
+        message: 'Data not found',
+      };
     }
+
+    return result;
   }
 }
