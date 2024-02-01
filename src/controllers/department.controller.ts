@@ -1,7 +1,4 @@
 import {
-  repository
-} from '@loopback/repository';
-import {
   post,
   del,
   get,
@@ -9,15 +6,14 @@ import {
   param,
   patch
 } from '@loopback/rest';
-import {DepartmentRepository, OrganizationRepository} from '../repositories';
 import {authenticate} from '@loopback/authentication';
+import {service} from '@loopback/core';
+import {DepartmentService} from '../services';
 
 export class DepartmentController {
   constructor(
-    @repository(DepartmentRepository)
-    public departmentRepository: DepartmentRepository,
-    @repository(OrganizationRepository)
-    public organizationRepository: OrganizationRepository,
+    @service(DepartmentService)
+    public departmentService: DepartmentService
   ) { }
 
   @authenticate('jwt')
@@ -25,6 +21,7 @@ export class DepartmentController {
     summary: 'Create departments API Endpoint',
     responses: {
       '200': {},
+      '400': {description: 'Cannot find organization'},
     },
   })
   async create(
@@ -51,25 +48,16 @@ export class DepartmentController {
       orgId: 'string',
     }
   ) {
-    const organization = await this.organizationRepository.findOne({
-      where: {
-        id: payload.orgId,
-        isDeleted: false
-      }
-    })
-    if (organization) {
-      const data = await this.departmentRepository.create(payload);
-      return {
-        statusCode: 200,
-        message: 'created successfully',
-        data
-      }
-    } else {
-      return {
+    const result = await this.departmentService.createDepartment(payload);
+
+    if (result.statusCode === 400) {
+      throw {
         statusCode: 400,
-        message: 'can not found organization',
-      }
+        message: 'Cannot find organization',
+      };
     }
+
+    return result;
   }
 
   @authenticate('jwt')
@@ -77,141 +65,108 @@ export class DepartmentController {
     summary: 'Count departments API Endpoint',
     responses: {
       '200': {},
+      '404': {description: 'Data not found'},
     },
   })
   async count() {
-    const data = await this.departmentRepository.find({
-      where: {
-        isDeleted: false,
-      }
-    });
+    const result = await this.departmentService.countDepartments();
 
-    if (!data) {
-      return {
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'data not found'
-      }
+        message: 'Data not found',
+      };
     }
 
-    const count = data.length;
-    return {
-      statusCode: 200,
-      message: 'success',
-      count
-    }
+    return result;
   }
 
   @authenticate('jwt')
   @get('/departments', {
     summary: 'List of departments API Endpoint',
     responses: {
-      '200': {}
-    }
+      '200': {},
+      '404': {description: 'Data not found'},
+    },
   })
   async find() {
-    const data = await this.departmentRepository.find({
-      where: {
-        isDeleted: false
-      }
-    });
+    const result = await this.departmentService.findDepartments();
 
-    if (!data[0]) {
-      return {
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'data not found',
-      }
+        message: 'Data not found',
+      };
     }
 
-    return {
-      statusCode: 200,
-      message: 'success',
-      data
-    }
+    return result;
   }
 
   @authenticate('jwt')
   @get('/departments/{id}', {
-    summary: 'Get departments by Id API Endpoint',
+    summary: 'Get departments by ID API Endpoint',
     responses: {
-      '200': {}
-    }
+      '200': {},
+      '404': {description: 'Department not found'},
+    },
   })
   async findById(
     @param.path.string('id') id: string,
   ) {
-    const data = await this.departmentRepository.findOne({
-      where: {
-        id,
-        isDeleted: false
-      },
-    });
+    const data = await this.departmentService.findDepartmentById(id);
 
     if (!data) {
-      return {
+      throw {
         statusCode: 404,
-        message: 'data not found'
-      }
+        message: 'Department not found',
+      };
     }
 
     return {
       statusCode: 200,
       message: 'success',
-      data
-    }
+      data,
+    };
   }
 
   @authenticate('jwt')
   @patch('/departments/{id}', {
     summary: 'Update departments API Endpoint',
     responses: {
-      '200': {}
-    }
+      '200': {},
+      '404': {description: 'Data not found'},
+    },
   })
   async updateById(
     @param.path.string('id') id: string,
     @requestBody({
-      description: 'Create departments API Endpoint',
+      description: 'Update departments API Endpoint',
       content: {
         'application/json': {
           schema: {
-            // required: ['name', 'orgId'],
             properties: {
-              name: {
-                type: 'string',
-              },
-              orgId: {
-                type: 'string',
-              }
-            }
-          }
+              name: {type: 'string'},
+              orgId: {type: 'string'},
+            },
+          },
         },
       },
     })
     payload: {
-      name: 'string',
-      orgId: 'string',
-    }
+      name?: string;
+      orgId?: string;
+    },
   ) {
-    const data = await this.departmentRepository.findOne({
-      where: {
-        id,
-        isDeleted: false
-      }
-    })
+    const result = await this.departmentService.updateDepartmentById(id, payload);
 
-    if (data) {
-      const result = await this.departmentRepository.updateById(data.id, payload);
-      return {
-        statusCode: 200,
-        message: 'Success',
-        result
-      }
-    } else {
-      return {
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'data not found',
-      }
+        message: 'Data not found',
+      };
     }
+
+    return result;
   }
 
   @authenticate('jwt')
@@ -219,30 +174,19 @@ export class DepartmentController {
     summary: 'Delete departments API Endpoint',
     responses: {
       '200': {},
+      '404': {description: 'Data not found or already deleted'},
     },
   })
   async deleteById(@param.path.string('id') id: string) {
-    const data = await this.departmentRepository.findOne({
-      where: {
-        id,
-        isDeleted: false
-      }
-    })
+    const result = await this.departmentService.deleteDepartmentById(id);
 
-    if (data) {
-      const result = await this.departmentRepository.updateById(id, {
-        isDeleted: true
-      });
-      return {
-        statusCode: 200,
-        message: 'success',
-        result
-      }
-    } else {
-      return {
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'Departments data already deleted'
-      }
+        message: 'Data not found or already deleted',
+      };
     }
+
+    return result;
   }
 }

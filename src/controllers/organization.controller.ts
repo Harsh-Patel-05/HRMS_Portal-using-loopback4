@@ -1,8 +1,5 @@
 import {service} from '@loopback/core';
 import {
-  repository
-} from '@loopback/repository';
-import {
   del,
   get,
   param,
@@ -10,18 +7,16 @@ import {
   post,
   requestBody
 } from '@loopback/rest';
-import {OrganizationRepository} from '../repositories';
 import {OrganizationService} from '../services';
+import {authenticate} from '@loopback/authentication';
 
 export class OrganizationController {
   constructor(
-    @repository(OrganizationRepository)
-    public organizationRepository: OrganizationRepository,
     @service(OrganizationService)
     public organizationService: OrganizationService,
   ) { }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @post('/organizations', {
     summary: 'Create organizations API Endpoint',
     responses: {
@@ -74,15 +69,7 @@ export class OrganizationController {
       state: 'string',
       zipcode: 'string'
     }) {
-    const data = await this.organizationService.createOrganization(
-      payload.org_name,
-      payload.email,
-      payload.phone,
-      payload.website,
-      payload.city,
-      payload.state,
-      payload.zipcode,
-    );
+    const data = await this.organizationService.createOrganization(payload);
 
     return {
       statusCode: 200,
@@ -91,7 +78,7 @@ export class OrganizationController {
     };
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @get('/organizations/count', {
     summary: 'Count organizations API Endpoint',
     responses: {
@@ -116,7 +103,7 @@ export class OrganizationController {
     }
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @get('/organizations', {
     summary: 'List of organizations API Endpoint',
     responses: {
@@ -141,7 +128,7 @@ export class OrganizationController {
     };
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @get('/organizations/{id}', {
     summary: 'Get organizations by ID API Endpoint',
     responses: {
@@ -166,7 +153,7 @@ export class OrganizationController {
     };
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @patch('/organizations/{id}', {
     summary: 'Update organizations API Endpoint',
     responses: {
@@ -233,7 +220,7 @@ export class OrganizationController {
     return result;
   }
 
-  // @authenticate('jwt')
+  @authenticate('jwt')
   @del('/organizations/{id}', {
     summary: 'Delete organizations API Endpoint',
     responses: {

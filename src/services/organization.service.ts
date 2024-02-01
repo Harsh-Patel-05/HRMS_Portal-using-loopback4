@@ -1,4 +1,4 @@
-import {BindingScope, inject, injectable} from '@loopback/core';
+import {BindingScope, injectable} from '@loopback/core';
 import {repository} from '@loopback/repository';
 import {OrganizationRepository} from '../repositories';
 import {Organization} from '../models';
@@ -10,7 +10,7 @@ export class OrganizationService {
     public organizationRepository: OrganizationRepository,
   ) { }
 
-  async createOrganization(
+  async createOrganization(payload: {
     org_name: string,
     email: string,
     phone: number,
@@ -18,18 +18,8 @@ export class OrganizationService {
     city: string,
     state: string,
     zipcode: string,
-  ): Promise<Organization> {
-    return this.organizationRepository.create({
-      org_name,
-      email,
-      phone,
-      website,
-      Address: {
-        city,
-        state,
-        zipcode,
-      },
-    });
+  }): Promise<Organization> {
+    return this.organizationRepository.create(payload);
   }
 
   async countOrganizations(): Promise<number> {
