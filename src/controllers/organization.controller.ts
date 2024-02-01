@@ -69,7 +69,15 @@ export class OrganizationController {
       state: 'string',
       zipcode: 'string'
     }) {
-    const data = await this.organizationService.createOrganization(payload);
+    const data = await this.organizationService.createOrganization(
+      payload.org_name,
+      payload.email,
+      payload.phone,
+      payload.website,
+      payload.city,
+      payload.state,
+      payload.zipcode
+    );
 
     return {
       statusCode: 200,

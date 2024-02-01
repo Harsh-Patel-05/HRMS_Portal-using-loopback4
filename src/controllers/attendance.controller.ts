@@ -1,13 +1,13 @@
-import {
-  post,
-  param,
-  get,
-  patch,
-  del,
-  requestBody,
-} from '@loopback/rest';
 import {authenticate} from '@loopback/authentication';
 import {service} from '@loopback/core';
+import {
+  del,
+  get,
+  param,
+  patch,
+  post,
+  requestBody,
+} from '@loopback/rest';
 import {AttendanceService} from '../services';
 
 export class AttendanceController {

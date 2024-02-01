@@ -10,7 +10,7 @@ export class OrganizationService {
     public organizationRepository: OrganizationRepository,
   ) { }
 
-  async createOrganization(payload: {
+  async createOrganization(
     org_name: string,
     email: string,
     phone: number,
@@ -18,8 +18,18 @@ export class OrganizationService {
     city: string,
     state: string,
     zipcode: string,
-  }): Promise<Organization> {
-    return this.organizationRepository.create(payload);
+  ): Promise<Organization> {
+    return this.organizationRepository.create({
+      org_name: org_name,
+      email: email,
+      phone: phone,
+      website: website,
+      Address: {
+        city: city,
+        state: state,
+        zipcode: zipcode,
+      }
+    });
   }
 
   async countOrganizations(): Promise<number> {
