@@ -1,7 +1,4 @@
 import {
-  repository,
-} from '@loopback/repository';
-import {
   del,
   get,
   param,
@@ -9,15 +6,14 @@ import {
   post,
   requestBody,
 } from '@loopback/rest';
-import {EmployeeRepository, LeaveRequestRepository} from '../repositories';
 import {authenticate} from '@loopback/authentication';
+import {service} from '@loopback/core';
+import {LeaveRequestService} from '../services';
 
 export class LeaveRequestController {
   constructor(
-    @repository(LeaveRequestRepository)
-    public leaveRequestRepository: LeaveRequestRepository,
-    @repository(EmployeeRepository)
-    public employeeRepository: EmployeeRepository,
+    @service(LeaveRequestService)
+    public leaveRequestService: LeaveRequestService
   ) { }
 
   @authenticate('jwt')
@@ -25,6 +21,9 @@ export class LeaveRequestController {
     summary: 'Create leave-requests API Endpoint',
     responses: {
       '200': {},
+      '404': {
+        description: 'Employee not found',
+      },
     },
   })
   async create(
@@ -35,144 +34,110 @@ export class LeaveRequestController {
           schema: {
             required: ['empId', 'start_date', 'end_date', 'leave_type'],
             properties: {
-              empId: {
-                type: 'string',
-              },
-              start_date: {
-                type: 'string',
-              },
-              end_date: {
-                type: 'string',
-              },
-              leave_type: {
-                type: 'string',
-              },
-            }
-          }
+              empId: {type: 'string'},
+              start_date: {type: 'string'},
+              end_date: {type: 'string'},
+              leave_type: {type: 'string'},
+            },
+          },
         },
       },
     })
     payload: {
-      empId: 'string',
-      start_date: 'string',
-      end_date: 'string',
-      leave_type: 'string',
-    }) {
-    const employee = await this.employeeRepository.findOne({
-      where: {
-        id: payload.empId,
-        isDeleted: false,
-      }
-    })
-    if (employee) {
-      const data = await this.leaveRequestRepository.create(payload);
-      return {
-        statusCode: 200,
-        message: 'created successfully',
-        data
-      }
-    } else {
-      return {
-        statusCode: 404,
-        message: 'can not found department'
-      }
+      empId: string;
+      start_date: string;
+      end_date: string;
+      leave_type: string;
+    },
+  ) {
+    const result = await this.leaveRequestService.createLeaveRequest(payload);
+
+    if (result.statusCode === 400) {
+      throw {
+        statusCode: 400,
+        message: 'Employee not found',
+      };
     }
+
+    return result;
   }
 
   @authenticate('jwt')
   @get('/leave-requests/count', {
-    summary: 'Count leave-requests API Endpoint',
+    summary: 'Count leave requests API Endpoint',
     responses: {
       '200': {},
+      '404': {description: 'Data not found'},
     },
   })
   async count() {
-    const data = await this.leaveRequestRepository.find({
-      where: {
-        isDeleted: false
-      }
-    });
+    const result = await this.leaveRequestService.countLeaveRequest();
 
-    if (!data) {
-      return {
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'data not found'
-      }
+        message: 'Data not found',
+      };
     }
 
-    const count = data.length;
-    return {
-      statusCode: 200,
-      message: 'success',
-      count
-    }
+    return result;
   }
 
   @authenticate('jwt')
   @get('/leave-requests', {
     summary: 'List of leave-requests API Endpoint',
     responses: {
-      '200': {}
-    }
+      '200': {},
+      '404': {description: 'Data not found'},
+    },
   })
   async find() {
-    const data = await this.leaveRequestRepository.find({
-      where: {
-        isDeleted: false
-      }
-    });
+    const result = await this.leaveRequestService.findLeaveRequest();
 
-    if (!data[0]) {
-      return {
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'data not found'
-      }
+        message: 'Data not found',
+      };
     }
 
-    return {
-      statusCode: 200,
-      message: 'success',
-      data
-    }
+    return result;
   }
 
   @authenticate('jwt')
   @get('/leave-requests/{id}', {
-    summary: 'Get leave-requests by Id API Endpoint',
+    summary: 'Get leave-requests by ID API Endpoint',
     responses: {
-      '200': {}
-    }
+      '200': {},
+      '404': {description: 'Employee not found'},
+    },
   })
   async findById(
     @param.path.string('id') id: string,
   ) {
-    const data = await this.leaveRequestRepository.findOne({
-      where: {
-        id,
-        isDeleted: false,
-      }
-    });
+    const data = await this.leaveRequestService.findLeaveRequestById(id);
 
     if (!data) {
-      return {
+      throw {
         statusCode: 404,
-        message: 'data not found'
-      }
+        message: 'LeaveRequest not found',
+      };
     }
 
     return {
       statusCode: 200,
       message: 'success',
-      data
-    }
+      data,
+    };
   }
 
   @authenticate('jwt')
   @patch('/leave-requests/{id}', {
     summary: 'Update leave-requests API Endpoint',
     responses: {
-      '200': {}
-    }
+      '200': {},
+      '404': {description: 'Data not found'},
+    },
   })
   async updateById(
     @param.path.string('id') id: string,
@@ -181,52 +146,32 @@ export class LeaveRequestController {
       content: {
         'application/json': {
           schema: {
-            // required: ['empId', 'start_date', 'end_date', 'leave_type'],
             properties: {
-              empId: {
-                type: 'string',
-              },
-              start_date: {
-                type: 'string',
-              },
-              end_date: {
-                type: 'string',
-              },
-              leave_type: {
-                type: 'string',
-              },
-            }
+              empId: {type: 'string'},
+              start_date: {type: 'string'},
+              end_date: {type: 'string'},
+              leave_type: {type: 'string'},
+            },
           }
         },
       },
     })
     payload: {
-      empId: 'string',
-      start_date: 'string',
-      end_date: 'string',
-      leave_type: 'string',
-    }
-  ) {
-    const data = await this.leaveRequestRepository.findOne({
-      where: {
-        id,
-        isDeleted: false
-      }
-    });
+      empId: string;
+      start_date: string;
+      end_date: string;
+      leave_type: string;
+    }) {
+    const result = await this.leaveRequestService.updateLeaveRequestById(id, payload);
 
-    if (!data) {
-      return {
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'data not found'
-      }
+        message: 'Data not found',
+      };
     }
 
-    const result = await this.leaveRequestRepository.updateById(data.id, payload);
-    return {
-      statusCode: 200,
-      message: 'success',
-      result
-    }
+    return result;
   }
 
   @authenticate('jwt')
@@ -234,30 +179,19 @@ export class LeaveRequestController {
     summary: 'Delete leave-requests API Endpoint',
     responses: {
       '200': {},
+      '404': {description: 'Data not found or already deleted'},
     },
   })
   async deleteById(@param.path.string('id') id: string) {
-    const data = await this.leaveRequestRepository.findOne({
-      where: {
-        id,
-        isDeleted: false
-      }
-    })
+    const result = await this.leaveRequestService.deleteLeaveRequestById(id);
 
-    if (data) {
-      const result = await this.leaveRequestRepository.updateById(id, {
-        isDeleted: true
-      });
-      return {
-        statusCode: 200,
-        message: 'success',
-        result
-      }
-    } else {
-      return {
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'Leave-requests data already deleted'
-      }
+        message: 'Data not found or already deleted',
+      };
     }
+
+    return result;
   }
 }
