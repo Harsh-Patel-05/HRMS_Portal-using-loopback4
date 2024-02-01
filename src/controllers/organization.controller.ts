@@ -1,3 +1,4 @@
+import {service} from '@loopback/core';
 import {
   repository
 } from '@loopback/repository';
@@ -7,18 +8,20 @@ import {
   param,
   patch,
   post,
-  requestBody,
+  requestBody
 } from '@loopback/rest';
 import {OrganizationRepository} from '../repositories';
-import {authenticate} from '@loopback/authentication';
+import {OrganizationService} from '../services';
 
 export class OrganizationController {
   constructor(
     @repository(OrganizationRepository)
     public organizationRepository: OrganizationRepository,
+    @service(OrganizationService)
+    public organizationService: OrganizationService,
   ) { }
 
-  @authenticate('jwt')
+  // @authenticate('jwt')
   @post('/organizations', {
     summary: 'Create organizations API Endpoint',
     responses: {
@@ -71,125 +74,110 @@ export class OrganizationController {
       state: 'string',
       zipcode: 'string'
     }) {
-    const data = await this.organizationRepository.create({
-      org_name: payload.org_name,
-      email: payload.email,
-      phone: payload.phone,
-      website: payload.website,
-      Address: {
-        city: payload.city,
-        state: payload.state,
-        zipcode: payload.zipcode,
-      }
-    });
+    const data = await this.organizationService.createOrganization(
+      payload.org_name,
+      payload.email,
+      payload.phone,
+      payload.website,
+      payload.city,
+      payload.state,
+      payload.zipcode,
+    );
 
     return {
       statusCode: 200,
       message: 'created successfully',
-      data
-    }
+      data,
+    };
   }
 
-  @authenticate('jwt')
+  // @authenticate('jwt')
   @get('/organizations/count', {
     summary: 'Count organizations API Endpoint',
     responses: {
       '200': {},
+      '404': {description: 'No organizations found'},
     },
   })
   async count() {
-    const data = await this.organizationRepository.find({
-      where: {
-        isDeleted: false
-      }
-    });
+    const data = await this.organizationService.countOrganizations();
 
-    if (!data) {
+    if (data === 0) {
       return {
         statusCode: 404,
-        message: 'Data not found'
+        message: 'No organizations found'
       }
     }
-
-    const count = data.length;
 
     return {
       statusCode: 200,
       message: 'success',
-      count
+      data
     }
   }
 
-  @authenticate('jwt')
+  // @authenticate('jwt')
   @get('/organizations', {
-    summary: 'List of student API Endpoint',
+    summary: 'List of organizations API Endpoint',
     responses: {
       '200': {},
+      '404': {description: 'No organizations found'},
     },
   })
   async find() {
-    const data = await this.organizationRepository.find({
-      where: {
-        isDeleted: false,
-      }
-    });
+    const data = await this.organizationService.findOrganizations();
 
-    if (!data[0]) {
-      return {
+    if (!data || data.length === 0) {
+      throw {
         statusCode: 404,
-        message: 'Data not found'
-      }
+        message: 'No organizations found',
+      };
     }
 
     return {
       statusCode: 200,
       message: 'success',
-      data
-    }
+      data,
+    };
   }
 
-  @authenticate('jwt')
+  // @authenticate('jwt')
   @get('/organizations/{id}', {
-    summary: 'Get organizations by id API Endpoint',
+    summary: 'Get organizations by ID API Endpoint',
     responses: {
-      '200': {}
-    }
+      '200': {},
+      '404': {description: 'Organization not found'},
+    },
   })
-  async findById(
-    @param.path.string('id') id: string,
-  ) {
-    const data = await this.organizationRepository.findOne({
-      where: {
-        id,
-        isDeleted: false
-      }
-    });
+  async findById(@param.path.string('id') id: string) {
+    const data = await this.organizationService.findOrganizationById(id);
 
     if (!data) {
-      return {
+      throw {
         statusCode: 404,
-        message: 'Data not found'
-      }
+        message: 'Organization not found',
+      };
     }
 
     return {
       statusCode: 200,
       message: 'success',
-      data
-    }
+      data,
+    };
   }
 
-  @authenticate('jwt')
+  // @authenticate('jwt')
   @patch('/organizations/{id}', {
     summary: 'Update organizations API Endpoint',
     responses: {
-      '200': {}
-    }
+      '200': {},
+      '404': {description: 'Organization not found'},
+    },
   })
   async updateById(
     @param.path.string('id') id: string,
     @requestBody({
-      description: 'Create organizations API Endpoint',
+      description: 'Update organizations API Endpoint',
       content: {
         'application/json': {
           schema: {
@@ -225,74 +213,44 @@ export class OrganizationController {
       },
     })
     payload: {
-      org_name: 'string',
-      email: 'string',
-      phone: number,
-      website: 'string',
-      city: 'string',
-      state: 'string',
-      zipcode: 'string'
+      org_name?: string;
+      email?: string;
+      phone?: number;
+      website?: string;
+      city?: string;
+      state?: string;
+      zipcode?: string;
     }) {
-    const data = await this.organizationRepository.findOne({
-      where: {
-        id,
-        isDeleted: false
-      }
-    });
+    const result = await this.organizationService.updateOrganizationById(id, payload);
 
-    if (data) {
-      const result = await this.organizationRepository.updateById(data.id, {
-        org_name: payload.org_name,
-        email: payload.email,
-        phone: payload.phone,
-        website: payload.website,
-        Address: {
-          city: payload.city,
-          state: payload.state,
-          zipcode: payload.zipcode
-        }
-      })
-      return {
-        statusCode: 200,
-        message: 'Data Updated successfully',
-        result
-      }
-    } else {
-      return {
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'Data Not Found'
-      }
+        message: 'Organization not found',
+      };
     }
+
+    return result;
   }
 
-  @authenticate('jwt')
+  // @authenticate('jwt')
   @del('/organizations/{id}', {
     summary: 'Delete organizations API Endpoint',
     responses: {
       '200': {},
+      '404': {description: 'Organization not found or data already deleted'},
     },
   })
   async deleteById(@param.path.string('id') id: string) {
-    const data = await this.organizationRepository.findOne({
-      where: {
-        id,
-        isDeleted: false
-      }
-    });
+    const result = await this.organizationService.deleteOrganizationById(id);
 
-    if (data) {
-      const result = await this.organizationRepository.updateById(id, {
-        isDeleted: true
-      })
-      return {
-        statusCode: 200,
-        message: 'Deleted Successfully'
-      }
-    } else {
-      return {
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'Organization data already deleted'
-      }
+        message: 'Organization not found or data already deleted',
+      };
     }
+
+    return result;
   }
 }
