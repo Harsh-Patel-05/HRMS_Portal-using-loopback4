@@ -1,23 +1,19 @@
+import {authenticate} from '@loopback/authentication';
+import {service} from '@loopback/core';
 import {
-  repository,
-} from '@loopback/repository';
-import {
-  post,
-  param,
-  get,
-  patch,
   del,
+  get,
+  param,
+  patch,
+  post,
   requestBody,
 } from '@loopback/rest';
-import {DepartmentRepository, EmployeeRepository} from '../repositories';
-import {authenticate} from '@loopback/authentication';
+import {EmployeeService} from '../services';
 
 export class EmployeeController {
   constructor(
-    @repository(EmployeeRepository)
-    public employeeRepository: EmployeeRepository,
-    @repository(DepartmentRepository)
-    public departmentRepository: DepartmentRepository,
+    @service(EmployeeService)
+    public employeeService: EmployeeService
   ) { }
 
   @authenticate('jwt')
@@ -25,6 +21,7 @@ export class EmployeeController {
     summary: 'Create employees API Endpoint',
     responses: {
       '200': {},
+      '400': {description: 'Cannot find department'},
     },
   })
   async create(
@@ -67,34 +64,23 @@ export class EmployeeController {
     payload: {
       depId: 'string',
       firstName: 'string',
-      laststName: 'string',
+      lastName: 'string',
       email: 'string',
       phone: number,
       hire_date: 'string',
       salary: number,
     }
   ) {
-    const department = await this.departmentRepository.findOne({
-      where: {
-        id: payload.depId,
-        isDeleted: false
-      }
-    });
+    const result = await this.employeeService.createEmployee(payload);
 
-    if (department) {
-      const data = await this.employeeRepository.create(payload);
-      return {
-        statusCode: 200,
-        message: 'created successfully',
-        data
-      }
-
-    } else {
-      return {
-        statusCode: 404,
-        message: 'can not found department',
-      }
+    if (result.statusCode === 400) {
+      throw {
+        statusCode: 400,
+        message: 'Cannot find department',
+      };
     }
+
+    return result;
   }
 
   @authenticate('jwt')
@@ -102,104 +88,85 @@ export class EmployeeController {
     summary: 'Count employees API Endpoint',
     responses: {
       '200': {},
+      '404': {description: 'Data not found'},
     },
   })
   async count() {
-    const data = await this.employeeRepository.find({
-      where: {
-        isDeleted: false,
-      }
-    });
+    const result = await this.employeeService.countEmployee();
 
-    if (!data) {
-      return {
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'data not found'
-      }
+        message: 'Data not found',
+      };
     }
 
-    const count = data.length;
-    return {
-      statusCode: 200,
-      message: 'success',
-      count
-    }
+    return result;
   }
 
   @authenticate('jwt')
   @get('/employees', {
     summary: 'List of employees API Endpoint',
     responses: {
-      '200': {}
-    }
+      '200': {},
+      '404': {description: 'Data not found'},
+    },
   })
   async find() {
-    const data = await this.employeeRepository.find({
-      where: {
-        isDeleted: false
-      }
-    });
+    const result = await this.employeeService.findEmployee();
 
-    if (!data[0]) {
-      return {
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'Data not found'
-      }
+        message: 'Data not found',
+      };
     }
 
-    return {
-      statusCode: 200,
-      message: 'success',
-      data
-    }
+    return result;
   }
 
   @authenticate('jwt')
   @get('/employees/{id}', {
-    summary: 'Get employees by Id API Endpoint',
+    summary: 'Get employees by ID API Endpoint',
     responses: {
-      '200': {}
-    }
+      '200': {},
+      '404': {description: 'Employee not found'},
+    },
   })
   async findById(
     @param.path.string('id') id: string,
   ) {
-    const data = await this.employeeRepository.findOne({
-      where: {
-        id,
-        isDeleted: false
-      }
-    });
+    const data = await this.employeeService.findEmployeeById(id);
 
     if (!data) {
-      return {
+      throw {
         statusCode: 404,
-        message: 'data not found'
-      }
+        message: 'Employee not found',
+      };
     }
 
     return {
       statusCode: 200,
       message: 'success',
-      data
-    }
+      data,
+    };
   }
 
   @authenticate('jwt')
   @patch('/employees/{id}', {
     summary: 'Update employees API Endpoint',
     responses: {
-      '200': {}
-    }
+      '200': {},
+      '404': {description: 'Data not found'},
+    },
   })
   async updateById(
     @param.path.string('id') id: string,
     @requestBody({
-      description: 'Create employees API Endpoint',
+      description: 'Update employees API Endpoint',
       content: {
         'application/json': {
           schema: {
-            // required: ['depId', 'firstName', 'lastName', 'email', 'phone', 'hire_date', 'salary'],
             properties: {
               depId: {
                 type: 'string',
@@ -231,34 +198,24 @@ export class EmployeeController {
       },
     })
     payload: {
-      depId: 'string',
-      firstName: 'string',
-      laststName: 'string',
-      email: 'string',
-      phone: number,
-      hire_date: 'string',
-      salary: number,
-    }
-  ) {
-    const data = await this.employeeRepository.findOne({
-      where: {
-        id,
-        isDeleted: false,
-      }
-    })
-    if (!data) {
-      return {
+      depId?: 'string',
+      firstName?: 'string',
+      lastName?: 'string',
+      email?: 'string',
+      phone?: number,
+      hire_date?: 'string',
+      salary?: number,
+    }) {
+    const result = await this.employeeService.updateEmployeeById(id, payload);
+
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'data not found'
-      }
+        message: 'Data not found',
+      };
     }
 
-    const result = await this.employeeRepository.updateById(data.id, payload);
-    return {
-      statusCode: 200,
-      message: 'success',
-      result
-    }
+    return result;
   }
 
   @authenticate('jwt')
@@ -266,30 +223,19 @@ export class EmployeeController {
     summary: 'Delete employees API Endpoint',
     responses: {
       '200': {},
+      '404': {description: 'Data not found or already deleted'},
     },
   })
   async deleteById(@param.path.string('id') id: string) {
-    const data = await this.employeeRepository.findOne({
-      where: {
-        id,
-        isDeleted: false
-      }
-    })
+    const result = await this.employeeService.deleteEmployeeById(id);
 
-    if (data) {
-      const result = await this.employeeRepository.updateById(id, {
-        isDeleted: true
-      });
-      return {
-        statusCode: 200,
-        message: 'success',
-        result
-      }
-    } else {
-      return {
+    if (result.statusCode === 404) {
+      throw {
         statusCode: 404,
-        message: 'Employees data already deleted'
-      }
+        message: 'Data not found or already deleted',
+      };
     }
+
+    return result;
   }
 }

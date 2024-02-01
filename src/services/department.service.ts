@@ -15,7 +15,7 @@ export class DepartmentService {
   async createDepartment(payload: {
     name: string;
     orgId: string;
-  }): Promise<{statusCode: number; message: string; data?: Department}> {
+  }){
     const organization = await this.organizationRepository.findOne({
       where: {
         id: payload.orgId,

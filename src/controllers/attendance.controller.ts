@@ -1,7 +1,4 @@
 import {
-  repository,
-} from '@loopback/repository';
-import {
   post,
   param,
   get,
@@ -9,7 +6,6 @@ import {
   del,
   requestBody,
 } from '@loopback/rest';
-import {AttendanceRepository, EmployeeRepository} from '../repositories';
 import {authenticate} from '@loopback/authentication';
 import {service} from '@loopback/core';
 import {AttendanceService} from '../services';
