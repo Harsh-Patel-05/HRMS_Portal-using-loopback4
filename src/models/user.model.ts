@@ -45,16 +45,6 @@ export class User extends Entity {
   })
   role: string;
 
-
-  // @property({
-  //   type: 'date',
-  //   default: null,
-  //   jsonSchema: {
-  //     nullable: true,
-  //   },
-  // })
-  // tokenExpireAt?: DateTime | null;
-
   @property({
     type: 'date',
     default: null,

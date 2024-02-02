@@ -162,7 +162,7 @@ export class AuthController {
     };
   }
 
-  // //Verify OTP API Endpoint
+  //Verify OTP API Endpoint
   @post('/auth/verifyOtp', {
     summary: 'Verify Otp API Endpoint',
     responses: {
