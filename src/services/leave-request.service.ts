@@ -12,6 +12,7 @@ export class LeaveRequestService {
     private leaveRequestRepository: LeaveRequestRepository,
   ) { }
 
+  //create leaveRequest repository
   async createLeaveRequest(payload: {
     empId: string;
     start_date: string;
@@ -40,6 +41,7 @@ export class LeaveRequestService {
     }
   }
 
+  //count leaveRequest repository
   async countLeaveRequest() {
     const data = await this.leaveRequestRepository.find({
       where: {
@@ -63,6 +65,7 @@ export class LeaveRequestService {
     }
   }
 
+  //find leaveRequest repository
   async findLeaveRequest() {
     const data = await this.leaveRequestRepository.find({
       where: {
@@ -84,6 +87,7 @@ export class LeaveRequestService {
     }
   }
 
+  //findById leaveRequest repository
   async findLeaveRequestById(id: string): Promise<LeaveRequest | null> {
     return this.leaveRequestRepository.findOne({
       where: {
@@ -93,6 +97,7 @@ export class LeaveRequestService {
     });
   }
 
+  //update leaveRequest repository
   async updateLeaveRequestById(
     id: string,
     payload: {
@@ -125,6 +130,7 @@ export class LeaveRequestService {
     };
   }
 
+  //delete leaveRequest repository
   async deleteLeaveRequestById(id: string) {
     const existingData = await this.leaveRequestRepository.findOne({
       where: {

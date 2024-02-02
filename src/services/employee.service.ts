@@ -12,6 +12,7 @@ export class EmployeeService {
     public departmentRepository: DepartmentRepository,
   ) { }
 
+  //create employee repository
   async createEmployee(payload: {
     depId: string;
     firstName: string;
@@ -43,6 +44,7 @@ export class EmployeeService {
     }
   }
 
+  //count employee repository
   async countEmployee() {
     const data = await this.employeeRepository.find({
       where: {
@@ -66,6 +68,7 @@ export class EmployeeService {
     }
   }
 
+  //find employee repository
   async findEmployee() {
     const data = await this.employeeRepository.find({
       where: {
@@ -87,6 +90,7 @@ export class EmployeeService {
     }
   }
 
+  //findById employee repository
   async findEmployeeById(id: string): Promise<Employee | null> {
     return this.employeeRepository.findOne({
       where: {
@@ -96,6 +100,7 @@ export class EmployeeService {
     });
   }
 
+  //update employee repository
   async updateEmployeeById(
     id: string,
     payload: {
@@ -130,7 +135,7 @@ export class EmployeeService {
       result,
     };
   }
-
+  //delete employee repository
   async deleteEmployeeById(id: string) {
     const existingData = await this.employeeRepository.findOne({
       where: {

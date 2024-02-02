@@ -12,10 +12,11 @@ export class DepartmentService {
     public organizationRepository: OrganizationRepository,
   ) { }
 
+  //create department repository
   async createDepartment(payload: {
     name: string;
     orgId: string;
-  }){
+  }) {
     const organization = await this.organizationRepository.findOne({
       where: {
         id: payload.orgId,
@@ -38,6 +39,7 @@ export class DepartmentService {
     }
   }
 
+  //count department repository
   async countDepartments() {
     const data = await this.departmentRepository.find({
       where: {
@@ -61,6 +63,7 @@ export class DepartmentService {
     };
   }
 
+  //find department repository
   async findDepartments() {
     const data = await this.departmentRepository.find({
       where: {
@@ -82,6 +85,7 @@ export class DepartmentService {
     };
   }
 
+  //findById department repository
   async findDepartmentById(id: string): Promise<Department | null> {
     return this.departmentRepository.findOne({
       where: {
@@ -91,6 +95,7 @@ export class DepartmentService {
     });
   }
 
+  //update department repository
   async updateDepartmentById(
     id: string,
     payload: {
@@ -121,6 +126,7 @@ export class DepartmentService {
     };
   }
 
+  //delete department repository
   async deleteDepartmentById(id: string) {
     const existingData = await this.departmentRepository.findOne({
       where: {

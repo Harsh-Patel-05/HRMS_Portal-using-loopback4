@@ -11,6 +11,7 @@ export class AttendanceService {
     public employeeRepository: EmployeeRepository,
   ) { }
 
+  //create attendance repository
   async createAttendance(payload: {
     empId: string;
     att_date: string;
@@ -39,6 +40,7 @@ export class AttendanceService {
     }
   }
 
+  //count attendance repository
   async countAttendances() {
     const data = await this.attendanceRepository.find({
       where: {
@@ -62,6 +64,7 @@ export class AttendanceService {
     };
   }
 
+  //find attendance repository
   async findAttendances() {
     const data = await this.attendanceRepository.find({
       where: {
@@ -83,6 +86,7 @@ export class AttendanceService {
     };
   }
 
+  //findById attendance repository
   async findAttendanceById(id: string) {
     const data = await this.attendanceRepository.findOne({
       where: {
@@ -105,6 +109,7 @@ export class AttendanceService {
     };
   }
 
+  //update attendance repository
   async updateAttendanceById(id: string, payload: {
     empId: string;
     att_date: string;
@@ -134,6 +139,7 @@ export class AttendanceService {
     };
   }
 
+  //delete attendance repository
   async deleteAttendanceById(id: string) {
     const data = await this.attendanceRepository.findOne({
       where: {

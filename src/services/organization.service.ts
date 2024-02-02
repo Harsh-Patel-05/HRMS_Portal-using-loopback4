@@ -10,6 +10,7 @@ export class OrganizationService {
     public organizationRepository: OrganizationRepository,
   ) { }
 
+  //create organization repository
   async createOrganization(
     org_name: string,
     email: string,
@@ -32,6 +33,7 @@ export class OrganizationService {
     });
   }
 
+  //count organization repository
   async countOrganizations(): Promise<number> {
     const result = await this.organizationRepository.count({
       isDeleted: false,
@@ -40,6 +42,7 @@ export class OrganizationService {
     return result.count ?? 0;
   }
 
+  //find organization repository
   async findOrganizations(): Promise<Organization[]> {
     return this.organizationRepository.find({
       where: {
@@ -48,6 +51,7 @@ export class OrganizationService {
     });
   }
 
+  //findById organization repository
   async findOrganizationById(id: string): Promise<Organization | null> {
     return this.organizationRepository.findOne({
       where: {
@@ -57,6 +61,7 @@ export class OrganizationService {
     });
   }
 
+  //update organization repository
   async updateOrganizationById(
     id: string,
     payload: {
@@ -102,6 +107,7 @@ export class OrganizationService {
     };
   }
 
+  //delete organization repository
   async deleteOrganizationById(id: string) {
     const existingData = await this.organizationRepository.findOne({
       where: {
