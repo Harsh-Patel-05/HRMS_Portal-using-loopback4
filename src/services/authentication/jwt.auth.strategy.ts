@@ -95,6 +95,7 @@ export class JWTAuthenticationStrategy implements AuthenticationStrategy {
       return {
         user,
         session,
+        orgId
       };
     } catch (err: any) {
       throw new HttpErrors.Unauthorized();
