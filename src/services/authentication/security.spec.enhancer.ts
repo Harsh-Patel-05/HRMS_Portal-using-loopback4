@@ -20,6 +20,7 @@ export const OPERATION_SECURITY_SPEC = [
   {
     // secure all endpoints with 'ai-auth-strategy'
     jwt: [],
+    org: [],
   },
 ];
 
@@ -28,6 +29,11 @@ export const SECURITY_SCHEME_SPEC: SecuritySchemeObjects = {
     type: 'http',
     scheme: 'bearer',
     bearerFormat: 'ai-auth-strategy',
+  },
+  org: {
+    type: 'apiKey',
+    in: 'header',
+    name: 'org',
   },
 };
 

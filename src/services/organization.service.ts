@@ -11,55 +11,55 @@ export class OrganizationService {
   ) { }
 
   //create organization repository
-  async createOrganization(
-    org_name: string,
-    email: string,
-    phone: number,
-    website: string,
-    city: string,
-    state: string,
-    zipcode: string,
-  ): Promise<Organization> {
-    return this.organizationRepository.create({
-      org_name: org_name,
-      email: email,
-      phone: phone,
-      website: website,
-      Address: {
-        city: city,
-        state: state,
-        zipcode: zipcode,
-      }
-    });
-  }
+  // async createOrganization(
+  //   org_name: string,
+  //   email: string,
+  //   phone: number,
+  //   website: string,
+  //   city: string,
+  //   state: string,
+  //   zipcode: string,
+  // ): Promise<Organization> {
+  //   return this.organizationRepository.create({
+  //     org_name: org_name,
+  //     email: email,
+  //     phone: phone,
+  //     website: website,
+  //     Address: {
+  //       city: city,
+  //       state: state,
+  //       zipcode: zipcode,
+  //     }
+  //   });
+  // }
 
   //count organization repository
-  async countOrganizations(): Promise<number> {
-    const result = await this.organizationRepository.count({
-      isDeleted: false,
-    });
+  // async countOrganizations(): Promise<number> {
+  //   const result = await this.organizationRepository.count({
+  //     isDeleted: false,
+  //   });
 
-    return result.count ?? 0;
-  }
+  //   return result.count ?? 0;
+  // }
 
   //find organization repository
-  async findOrganizations(): Promise<Organization[]> {
-    return this.organizationRepository.find({
-      where: {
-        isDeleted: false,
-      },
-    });
-  }
+  // async findOrganizations(): Promise<Organization[]> {
+  //   return this.organizationRepository.find({
+  //     where: {
+  //       isDeleted: false,
+  //     },
+  //   });
+  // }
 
   //findById organization repository
-  async findOrganizationById(id: string): Promise<Organization | null> {
-    return this.organizationRepository.findOne({
-      where: {
-        id,
-        isDeleted: false,
-      },
-    });
-  }
+  // async findOrganizationById(id: string): Promise<Organization | null> {
+  //   return this.organizationRepository.findOne({
+  //     where: {
+  //       id,
+  //       isDeleted: false,
+  //     },
+  //   });
+  // }
 
   //update organization repository
   async updateOrganizationById(
@@ -108,28 +108,28 @@ export class OrganizationService {
   }
 
   //delete organization repository
-  async deleteOrganizationById(id: string) {
-    const existingData = await this.organizationRepository.findOne({
-      where: {
-        id,
-        isDeleted: false,
-      },
-    });
+  // async deleteOrganizationById(id: string) {
+  //   const existingData = await this.organizationRepository.findOne({
+  //     where: {
+  //       id,
+  //       isDeleted: false,
+  //     },
+  //   });
 
-    if (!existingData) {
-      return {
-        statusCode: 404,
-        message: 'Organization data already deleted',
-      };
-    }
+  //   if (!existingData) {
+  //     return {
+  //       statusCode: 404,
+  //       message: 'Organization data already deleted',
+  //     };
+  //   }
 
-    const result = await this.organizationRepository.updateById(id, {
-      isDeleted: true,
-    });
+  //   const result = await this.organizationRepository.updateById(id, {
+  //     isDeleted: true,
+  //   });
 
-    return {
-      statusCode: 200,
-      message: 'Deleted Successfully',
-    };
-  }
+  //   return {
+  //     statusCode: 200,
+  //     message: 'Deleted Successfully',
+  //   };
+  // }
 }

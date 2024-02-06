@@ -381,7 +381,7 @@ export class AuthController {
       password: hashedPassword,
     });
 
-    const updateUser = await this.userRepository.updateById
+    // const updateUser = await this.userRepository.updateById()
 
     return {
       statusCode: 200,

@@ -1,31 +1,41 @@
-import {injectable, BindingScope} from '@loopback/core';
+import {BindingScope, inject, injectable} from '@loopback/core';
 import {repository} from '@loopback/repository';
-import {DepartmentRepository, OrganizationRepository} from '../repositories';
+import {SecurityBindings} from '@loopback/security';
 import {Department} from '../models';
+import {DepartmentRepository, OrganizationRepository} from '../repositories';
+import {AuthCredentials} from './authentication/jwt.auth.strategy';
+
 
 @injectable({scope: BindingScope.TRANSIENT})
 export class DepartmentService {
+  orgId;
   constructor(
     @repository(DepartmentRepository)
     public departmentRepository: DepartmentRepository,
     @repository(OrganizationRepository)
     public organizationRepository: OrganizationRepository,
-  ) { }
+    @inject(SecurityBindings.USER)
+    public authCredentials: AuthCredentials,
+  ) {
+    this.orgId = <string>authCredentials?.org?.id;
+  }
 
   //create department repository
   async createDepartment(payload: {
     name: string;
-    orgId: string;
   }) {
     const organization = await this.organizationRepository.findOne({
       where: {
-        id: payload.orgId,
+        id: this.orgId,
         isDeleted: false,
       },
     });
 
     if (organization) {
-      const data = await this.departmentRepository.create(payload);
+      const data = await this.departmentRepository.create({
+        name: payload.name,
+        orgId: this.orgId
+      });
       return {
         statusCode: 200,
         message: 'created successfully',

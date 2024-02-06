@@ -4,13 +4,14 @@ import {repository} from '@loopback/repository';
 import {HttpErrors, Request, RestBindings} from '@loopback/rest';
 import {UserProfile, securityId} from '@loopback/security';
 import {TokenServiceBindings} from '../../keys';
-import {Session} from '../../models';
+import {Organization, Session} from '../../models';
 import {User} from '../../models/user.model';
-import {SessionRepository, UserRepository} from '../../repositories';
+import {OrganizationRepository, SessionRepository, UserRepository} from '../../repositories';
 
 export type AuthCredentials = {
   user?: User;
   session?: Session;
+  org?: Organization;
 };
 export class JWTAuthenticationStrategy implements AuthenticationStrategy {
   name = 'jwt';
@@ -23,7 +24,9 @@ export class JWTAuthenticationStrategy implements AuthenticationStrategy {
     public sessionRepository: SessionRepository,
     @repository(UserRepository)
     public userRepository: UserRepository,
-  ) {}
+    @repository(OrganizationRepository)
+    public organizationRepository: OrganizationRepository,
+  ) { }
 
   async authenticate(
     request: Request,
@@ -54,6 +57,12 @@ export class JWTAuthenticationStrategy implements AuthenticationStrategy {
       );
     }
 
+    const orgId = <string>request.headers['org'];
+
+    if (!orgId) {
+      throw new HttpErrors.Unauthorized(`Organization ID is missing`);
+    }
+
     try {
       const token = parts[1];
 
@@ -68,6 +77,14 @@ export class JWTAuthenticationStrategy implements AuthenticationStrategy {
 
       if (session) {
         user = await this.userRepository.findById(userProfile[securityId]);
+
+        const org = await this.organizationRepository.findById(orgId);
+
+        return {
+          user,
+          session,
+          org,
+        }
       }
 
       // check if session is locked
@@ -77,7 +94,7 @@ export class JWTAuthenticationStrategy implements AuthenticationStrategy {
 
       return {
         user,
-        session
+        session,
       };
     } catch (err: any) {
       throw new HttpErrors.Unauthorized();

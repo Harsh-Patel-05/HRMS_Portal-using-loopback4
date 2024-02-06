@@ -1,13 +1,13 @@
-import {
-  post,
-  del,
-  get,
-  requestBody,
-  param,
-  patch
-} from '@loopback/rest';
 import {authenticate} from '@loopback/authentication';
 import {service} from '@loopback/core';
+import {
+  del,
+  get,
+  param,
+  patch,
+  post,
+  requestBody
+} from '@loopback/rest';
 import {DepartmentService} from '../services';
 
 export class DepartmentController {
@@ -30,14 +30,11 @@ export class DepartmentController {
       content: {
         'application/json': {
           schema: {
-            required: ['name', 'orgId'],
+            required: ['name'],
             properties: {
               name: {
                 type: 'string',
               },
-              orgId: {
-                type: 'string',
-              }
             }
           }
         },
@@ -45,7 +42,6 @@ export class DepartmentController {
     })
     payload: {
       name: 'string',
-      orgId: 'string',
     }
   ) {
     const result = await this.departmentService.createDepartment(payload);
