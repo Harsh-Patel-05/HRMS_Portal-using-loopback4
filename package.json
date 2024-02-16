@@ -12,7 +12,7 @@
     "node": "16 || 18 || 20"
   },
   "scripts": {
-    "build": "lb-tsc",
+    "build": "node init && lb-tsc",
     "build:watch": "lb-tsc --watch",
     "lint": "npm run eslint && npm run prettier:check",
     "lint:fix": "npm run eslint:fix && npm run prettier:fix",
@@ -32,7 +32,7 @@
     "preopenapi-spec": "npm run build",
     "openapi-spec": "node ./dist/openapi-spec",
     "prestart": "npm run rebuild",
-    "start": "node -r source-map-support/register .",
+    "start": "node init && node -r source-map-support/register .",
     "start:watch": "nodemon ./dist/index.js --local",
     "clean": "lb-clean dist *.tsbuildinfo .eslintcache",
     "rebuild": "npm run clean && npm run build"
